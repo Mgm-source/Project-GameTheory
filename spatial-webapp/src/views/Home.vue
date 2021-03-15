@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <div class="home">
+    <div class="g-teal-500 md:bg-red-500 lg:bg-teal-500">
       <h1>This is a Home page</h1>
   </div>
 </body>

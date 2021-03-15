@@ -1,8 +1,14 @@
 <template>
-  <div>
-      <router-link :to="{name : 'Home' }">Home</router-link> | 
-      <router-link :to="{name : 'About' }">About</router-link>
-  </div>
+  <nav class="bg-gray-800">
+    <div class="px-2">
+      <div class="relative flex items-center justify-between h-16">
+            <div class="flex space-x-4">
+              <router-link class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium" :to="{name : 'Home' }">Home</router-link>
+              <router-link class="bg-yellow-400 text-white px-3 py-2 rounded-md text-sm font-medium" :to="{name : 'About' }">About</router-link>
+            </div>
+      </div>
+    </div>
+  </nav>
   
   <router-view>
   </router-view>
