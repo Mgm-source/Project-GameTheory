@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-red-500"></div>
+  <div class="bg-green-500">
+    <h1>This is where the spatial game goes</h1>
+  </div>
 </template>
 
 <script>
