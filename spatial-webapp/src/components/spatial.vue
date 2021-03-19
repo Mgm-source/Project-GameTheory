@@ -1,54 +1,40 @@
 <template>
- <div v-if="size.x >= 2 && size.y >= 2">
-       <button class="bg-white hover:bg-blue-500 text-blue-700 font-semibold
-                 hover:text-white py-2 px-4 border border-blue-500" @click="initGame" v-if="visible">
-    test
- </button>
- <div v-for="player in players" :key="player.id">
-    <input type="text" v-model="player.strategy"> Id: {{player.id}}
- </div>
- </div>
- <div v-else>
-     X : <input type="text" v-model="size.x"> 
-     Y : <input type="text" v-model="size.y">
- </div>
+<div class="spatial-board gap-2" :style="dynamicGrid">
+  <template v-for="p in players " :key="p.id">
+    <board-cell :player="p" @select-cell="selectPlayer">
+    </board-cell>
+  </template>
+</div>
 </template>
 
 <script>
+import BoardCell from './BoardCell.vue';
 export default {
-  name: "SpatialGameLogic",
-  components: {},
-
+  name: "SpatialGame",
+  props: {
+    players : { type : Array, required : true },
+    game : { type : Array, required : true } 
+  },
   data() {
-    return { game: [], players : [], size : {x : 0, y: 0 } , visible : true};
+    return { dynamicGrid : { "grid-template-columns" : `repeat(${this.game.length} ,2fr)`, 
+                             "grid-template-rows" : `repeat(${this.game.length} ,2fr)`} 
+                            }
   },
-  methods: {
-    createMatrix(x, y) {
-      let gameMatrix = [];
-      let count = 0;
-      for (let i = 0; i < y; i++) {
-        let row = [];
-        for (let j = 0; j < x; j++) {
-          row.push({ strategy: "", payOff: 0, id: count++ });
-        }
-        gameMatrix.push(row);
+  components: {
+    BoardCell
+  },
+  methods : {
+    selectPlayer(pos){
+      if(this.interactive){
+        this.$emit('select-pos',pos)
       }
-      return gameMatrix;
-    },
-    initGame(event) {
-        console.log(event);
-        this.visible = !this.visible;
-      this.game = this.createMatrix(this.size.x, this.size.y);
-      console.log(this.game);
-      this.game.forEach(m=>m.forEach(a=>{
-          this.players.push(a);
-          })
-          )
-          console.log(this.players);
-    },
-  },
+    }
+  }
 };
 </script>
-
 <style>
+.spatial-board {
+display: grid;
+
+}
 </style>
