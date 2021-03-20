@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-blue-500 h-12 rounded-md flex items-center justify-center text-white text-2xl font-extrabold" @click="playerStatus(player)">
-    <i v-if="player">{{player.id}}</i>
+  <div class="bg-blue-500 h-12 rounded-md flex items-center justify-center text-white text-2xl font-extrabold hover:bg-red-700" @click="playerStatus">
+    <i>{{player.strategy}} : {{player.payOff}}</i>
   </div>
 </template>
 
@@ -15,9 +15,8 @@ export default {
    // col() {return `board-cell-col-${this.player.id % this.size}`}
   },
   methods : {
-    playerStatus(p){
-      this.$emit('select-cell',p);
-      console.log("clicked", p);
+    playerStatus(event){
+      this.$emit('select-cell',event,this.player);
     }
   }
 }

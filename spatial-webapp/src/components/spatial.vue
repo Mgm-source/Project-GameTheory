@@ -1,6 +1,6 @@
 <template>
 <div class="spatial-board gap-2" :style="dynamicGrid">
-  <template v-for="p in players " :key="p.id">
+  <template class="group" v-for="p in players " :key="p.id">
     <board-cell :player="p" @select-cell="selectPlayer">
     </board-cell>
   </template>
@@ -16,17 +16,16 @@ export default {
     game : { type : Array, required : true } 
   },
   data() {
-    return { dynamicGrid : { "grid-template-columns" : `repeat(${this.game.length} ,2fr)`, 
-                             "grid-template-rows" : `repeat(${this.game.length} ,2fr)`} 
-                            }
+    return { dynamicGrid : { "grid-template-columns" : `repeat(${this.game.length} ,1fr)`,  "grid-template-rows" : `repeat(${this.game.length} ,1fr)`} }
   },
   components: {
     BoardCell
   },
   methods : {
-    selectPlayer(pos){
+    selectPlayer(event,player){
+      console.log(event,player);
       if(this.interactive){
-        this.$emit('select-pos',pos)
+        this.$emit('select-pos',player)
       }
     }
   }
