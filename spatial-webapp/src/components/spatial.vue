@@ -1,6 +1,6 @@
 <template>
 <div class="spatial-board gap-2" :style="dynamicGrid">
-  <template class="group" v-for="p in players " :key="p.id">
+  <template v-for="p in players " :key="p.id">
     <board-cell :player="p" @select-cell="selectPlayer">
     </board-cell>
   </template>
@@ -34,6 +34,5 @@ export default {
 <style>
 .spatial-board {
 display: grid;
-
 }
 </style>

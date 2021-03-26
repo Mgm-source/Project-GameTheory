@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-green-500">
-    <h1>This is where the spatial game goes</h1>
-    <button class="bg-red-300 py-2 px-4 bg-light-blue-500 text-white font-semibold rounded-lg" @click="initGame">Start</button>
-    <spatial
+  <div class="h-screen w-screen">
+    <h1>This is where the spatial game information graph and stats goes</h1>
+    <button class="bg-yellow-500 py-2 px-4 bg-light-blue-500 text-white font-semibold rounded-lg" @click="initGame">Start</button>
+    <spatial class="m-8"
       :players="players"
       @select-pos="currentPlayer"
       :game="game"
@@ -24,18 +24,18 @@ export default {
     return {
       game: [],
       players: [],
-      size: { x: 4, y: 4 },
+      size: 50,
       gamestart: false,
       currentPlayer: null,
     };
   },
   methods: {
-    createMatrix(x, y) {
+    createMatrix(size) {
       let gameMatrix = [];
       let count = 0;
-      for (let i = 0; i < y; i++) {
+      for (let i = 0; i < size; i++) {
         let row = [];
-        for (let j = 0; j < x; j++) {
+        for (let j = 0; j < size; j++) {
           row.push({ strategy: "", payOff: 0, id: count++ });
         }
         gameMatrix.push(row);
@@ -44,7 +44,7 @@ export default {
     },
     initGame() {
       this.gamestart = true;
-      this.game = this.createMatrix(this.size.x, this.size.y);
+      this.game = this.createMatrix(this.size);
       this.game.forEach((matrix) =>
         matrix.forEach((player) => {
           const testS = ["C", "D"];
