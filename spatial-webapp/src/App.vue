@@ -1,4 +1,5 @@
 <template>
+<div id="app">
   <nav class="bg-gray-800">
     <div class="px-2">
       <div class="relative flex items-center justify-between h-16">
@@ -12,14 +13,13 @@
   </nav>
   <router-view>
   </router-view>
+</div>
 </template>
-
 <script>
 
 export default {
   name: 'App',
-  components: {
-  }
+  components: {}
 }
 </script>
 
