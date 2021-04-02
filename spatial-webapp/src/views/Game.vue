@@ -5,11 +5,13 @@
       <input id="strats" type="text" name="stats" class="focus:ring-indigo-500 focus:border-indigo-500 block  pl-7 pr-1 sm:text-lg border-gray-300 rounded-md" maxlength="1" v-model="strategy"/>
       <button class="absolute inset-y-0 right-0 items-center spx-4 font-bold text-white bg-indigo-600 rounded-r-lg hover:bg-indigo-500 focus:bg-indigo-700" @click="addStrat">Add</button>
         <label for="strategy">Strategies:</label>
-        <select id="strategy" name="strategy" class="focus:ring-indigo-500 focus:border-indigo-500 h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm rounded-md" >
-          <option v-for="(strategy, index) in strategies" :key="index">
-            {{ strategy }}
-          </option>
-        </select>
+        <ul id="strategy" name="strategy" class="focus:ring-indigo-500 focus:border-indigo-500 h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm rounded-md" >
+          <div v-for="(strategy, index) in statPermutations" :key="index" class="p-4 mb-3 flex justify-between items-center bg-white shadow rounded-lg cursor-move">
+            {{ strategy.outcome }}
+            <label for="dValue">value:</label>
+          <input type="number" name="value" id="dValue" :value="strategy.value = index ">
+          </div>
+        </ul>
     </div>
     <h1>This is where the spatial game information graph and stats goes</h1>
     <button class="bg-yellow-500 py-2 px-4 bg-light-blue-500 text-white font-semibold rounded-lg" @click="initGame">
@@ -36,8 +38,23 @@ export default {
       gamestart: false,
       currentPlayer: null,
       strategies: ["C", "D"],
-      strategy : ""
+      strategy: "",
+      playOffValues: [],
     };
+  },
+  computed: {
+    statPermutations() {
+      return this.strategies
+        .map((current, i, array) => {
+          let perm = [];
+          for (let index = 0; index < this.strategies.length; index++) {
+            const denomation = current + array[index];
+            perm.push({ outcome: denomation, value: 0 });
+          }
+          return perm;
+        })
+        .flat();
+    },
   },
   methods: {
     createMatrix(size) {
@@ -55,38 +72,57 @@ export default {
     initGame() {
       this.gamestart = true;
       this.game = this.createMatrix(this.size);
+      this.playOffValues = this.statPermutations;
+
       this.game.forEach((matrix) =>
         matrix.forEach((player) => {
-          player.strategy = this.strategies[
-            Math.floor(Math.random() * this.strategies.length)
-          ];
+          player.strategy = this.strategies[Math.floor(Math.random() * this.strategies.length)];
           this.players.push(player);
         })
       );
+
       this.checkStrategy();
       console.log(this.players);
-      // let numOfPerm = Math.pow(this.strategies.length,2);
+
+      // let numOfPerm =;
       // console.log(numOfPerm);
     },
     checkStrategy() {
       //const neighbours = [[0, 1],[1, 0],[0, -1],[-1, 0]];
       this.game.forEach((matrix, i) => {
         matrix.forEach((player, j) => {
-          this.checkneighbours(i, j,player);
+          this.checkneighbours(i, j, player);
         });
       });
-      console.log(this.statPermutations().flat());
     },
     checkneighbours(i, j, player) {
-      const westPlayer = j > 0 ? this.game[i][j - 1].strategy : "";
-      const eastPlayer = j < this.game.length - 1 ? this.game[i][j + 1].strategy : "";
-      const northPlayer = i > 0 ? this.game[i - 1][j].strategy : "";
-      const southPlayer = i < this.game.length - 1 ? this.game[i + 1][j].strategy : "";
-      console.log(player.strategy + westPlayer);
-      console.log(player.strategy + eastPlayer);
-      console.log(player.strategy + northPlayer);
-      console.log(player.strategy + southPlayer);
+      const westPlayerStat =  j > 0 ? player.strategy + this.game[i][j - 1].strategy : "";
+      const eastPlayerStat =  j < this.game.length - 1 ? player.strategy + this.game[i][j + 1].strategy  : "";
+      const northPlayerStat = i > 0 ? player.strategy + this.game[i - 1][j].strategy : "";
+      const southPlayerStat = i < this.game.length - 1  ? player.strategy + this.game[i + 1][j].strategy : "";
 
+      this.playOffValues.forEach((state) => {
+        if (westPlayerStat !== "") {
+          if (state.outcome == westPlayerStat) {
+            player.payOff += state.value;
+          }
+        }
+        if (eastPlayerStat !== "") {
+          if (state.outcome == eastPlayerStat) {
+            player.payOff += state.value;
+          }
+        }
+        if (northPlayerStat !== "") {
+          if (state.outcome == northPlayerStat) {
+            player.payOff += state.value;
+          }
+        }
+        if (southPlayerStat !== "") {
+          if (state.outcome == southPlayerStat) {
+            player.payOff += state.value;
+          }
+        }
+      });
       // right
       // if (j < this.game.length - 1) {
       //   if (game[i][j + 1].strategy == "C" && game[i][j].strategy == "C") {
@@ -149,21 +185,9 @@ export default {
       //     game[i][j].payOff += 2;
       //   }
     },
-    statPermutations() {
-      const copy = this.strategies.map((current, i, array) => {
-        let perm = [];
-        if (i < this.strategies.length) {
-          for (let index = 0; index < this.strategies.length; index++) {
-            perm.push(current + array[index]);
-          }
-        }
-        return perm;
-      });
-      return copy;
-    },
     addStrat() {
-      if(this.strategy != ""){
-        this.strategies.push(this.strategy);
+      if (this.strategy != "") {
+        this.strategies.push(this.strategy.toUpperCase());
       }
     },
   },
