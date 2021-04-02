@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import Spatial from "@/components/Spatial";
+import Spatial from "@/components/spatial";
 // @ is an alias to /src
 
 export default {
