@@ -1,7 +1,10 @@
 <template>
   <div class="spatial-board gap-2" :style="dynamicGrid">
     <template v-for="p in players" :key="p.id">
-      <board-cell :player="p" @select-cell="selectPlayer"></board-cell>
+      <board-cell
+        :player="p"
+        @select-cell="selectPlayer"
+      ></board-cell>
     </template>
   </div>
 </template>
@@ -14,6 +17,7 @@ export default {
     players: { type: Array, required: true },
     game: { type: Array, required: true },
   },
+  computed: { },
   data() {
     return {};
   },
@@ -33,7 +37,6 @@ export default {
       "grid-template-columns": `repeat(${props.game.length} ,1fr)`,
       "grid-template-rows": `repeat(${props.game.length} ,1fr)`,
     };
-
     return { dynamicGrid };
   },
 };
