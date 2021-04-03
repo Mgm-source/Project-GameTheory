@@ -81,48 +81,41 @@ export default {
         })
       );
 
+      // make the function return true when all the players have been checked
+      // while loop to for the game function 
       this.checkStrategy();
-      console.log(this.players);
+      console.log(this.game);
+      this.checkPlayOff();
 
       // let numOfPerm =;
       // console.log(numOfPerm);
+    },
+    checkPlayOff() {
+      //const neighbours = [[0, 1],[1, 0],[0, -1],[-1, 0]];
+      this.game.forEach((matrix, i) => {
+        matrix.forEach((player, j) => {
+          this.checkneighbours(i, j, player,"payOff", ()=>{
+            // return a array 
+          });
+        });
+      });
     },
     checkStrategy() {
       //const neighbours = [[0, 1],[1, 0],[0, -1],[-1, 0]];
       this.game.forEach((matrix, i) => {
         matrix.forEach((player, j) => {
-          this.checkneighbours(i, j, player);
+          this.checkneighbours(i, j, player,"strategy",this.playerStat);
         });
       });
     },
-    checkneighbours(i, j, player) {
-      const westPlayerStat =  j > 0 ? player.strategy + this.game[i][j - 1].strategy : "";
-      const eastPlayerStat =  j < this.game.length - 1 ? player.strategy + this.game[i][j + 1].strategy  : "";
-      const northPlayerStat = i > 0 ? player.strategy + this.game[i - 1][j].strategy : "";
-      const southPlayerStat = i < this.game.length - 1  ? player.strategy + this.game[i + 1][j].strategy : "";
+    checkneighbours(i, j, player, prop, callback) {
+      const westPlayerStat =  j > 0 ?  this.game[i][j - 1][prop] : "";
+      const eastPlayerStat =  j < this.game.length - 1 ? this.game[i][j + 1][prop]  : "";
+      const northPlayerStat = i > 0 ?  this.game[i - 1][j][prop] : "";
+      const southPlayerStat = i < this.game.length - 1  ? this.game[i + 1][j][prop] : "";
 
-      this.playOffValues.forEach((state) => {
-        if (westPlayerStat !== "") {
-          if (state.outcome == westPlayerStat) {
-            player.payOff += state.value;
-          }
-        }
-        if (eastPlayerStat !== "") {
-          if (state.outcome == eastPlayerStat) {
-            player.payOff += state.value;
-          }
-        }
-        if (northPlayerStat !== "") {
-          if (state.outcome == northPlayerStat) {
-            player.payOff += state.value;
-          }
-        }
-        if (southPlayerStat !== "") {
-          if (state.outcome == southPlayerStat) {
-            player.payOff += state.value;
-          }
-        }
-      });
+      console.log(eastPlayerStat);
+      callback(westPlayerStat,eastPlayerStat,northPlayerStat,southPlayerStat,player);
       // right
       // if (j < this.game.length - 1) {
       //   if (game[i][j + 1].strategy == "C" && game[i][j].strategy == "C") {
@@ -189,6 +182,30 @@ export default {
       if (this.strategy != "") {
         this.strategies.push(this.strategy.toUpperCase());
       }
+    },
+    playerStat(leftP,rightP,aboveP,belowP,middleP){
+          this.playOffValues.forEach((state) => {
+        if (middleP.strategy+leftP !== "") {
+          if (state.outcome == middleP.strategy) {
+            middleP.payOff += state.value;
+          }
+        }
+        if (middleP.strategy+rightP !== "") {
+          if (state.outcome == middleP.strategy+rightP) {
+            middleP.payOff += state.value;
+          }
+        }
+        if (middleP.strategy+aboveP !== "") {
+          if (state.outcome == middleP.strategy+aboveP) {
+            middleP.payOff += state.value;
+          }
+        }
+        if (middleP.strategy+belowP !== "") {
+          if (state.outcome == middleP.strategy+belowP) {
+            middleP.payOff += state.value;
+          }
+        }
+      });
     },
   },
 };
