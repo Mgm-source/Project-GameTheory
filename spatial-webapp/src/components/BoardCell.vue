@@ -18,6 +18,7 @@ export default {
       return this.interactive ? "bg-red-700" : this.stratColour();
     },
     // col() {return `board-cell-col-${this.player.id % this.size}`}
+    // row() {return `board-cell-row-${Math.floor(this.player.id / this.size)}`},
   },
   methods: {
     playerStatus(event) {
