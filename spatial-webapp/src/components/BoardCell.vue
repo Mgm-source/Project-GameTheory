@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   name: "MatrixCell",
   props: {
@@ -15,37 +16,23 @@ export default {
   },
   computed: {
     active() {
-      return this.interactive ? "bg-red-700" : this.stratColour();
+      return this.interactive ? "bg-red-700" : this.stratColour.colour;
     },
     // col() {return `board-cell-col-${this.player.id % this.size}`}
     // row() {return `board-cell-row-${Math.floor(this.player.id / this.size)}`},
+    ...mapState([
+      'colours'
+    ]),
+    stratColour() {
+      console.log(this.colours);
+      return this.colours.find((element => element.letter == this.player.strategy))
+    }
   },
   methods: {
     playerStatus(event) {
       this.interactive = !this.interactive;
       this.$emit("select-cell", event, this.player);
     },
-    stratColour() {
-      const delta = this.player.strategy.charCodeAt() % this.colours.length;
-      return this.colours.reduce((accu, curr, index) => {
-        if (delta == index) {
-          accu = curr;
-        }
-        return accu;
-      });
-    },
-  },
-  setup() {
-    const colours = [
-      "bg-gray-700",
-      "bg-indigo-700",
-      "bg-yellow-700",
-      "bg-green-700",
-      "bg-blue-700",
-      "bg-purple-700",
-      "bg-pink-700",
-    ];
-    return { colours };
   },
 };
 </script>

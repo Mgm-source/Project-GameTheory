@@ -23,6 +23,7 @@
 
 <script>
 import Spatial from "@/components/spatial";
+import { mapState } from "vuex";
 // @ is an alias to /src
 
 export default {
@@ -55,6 +56,7 @@ export default {
         })
         .flat();
     },
+    ...mapState(["colours"]),
   },
   methods: {
     createMatrix(size) {
@@ -76,13 +78,16 @@ export default {
 
       this.game.forEach((matrix) =>
         matrix.forEach((player) => {
-          player.strategy = this.strategies[Math.floor(Math.random() * this.strategies.length)];
+          player.strategy = this.strategies[
+            Math.floor(Math.random() * this.strategies.length)
+          ];
           this.players.push(player);
         })
       );
 
+      this.assignColours(this.colours);
       // make the function return true when all the players have been checked
-      // while loop to for the game function 
+      // while loop to for the game function
       this.checkStrategy();
       console.log(this.game);
       this.checkPlayOff();
@@ -94,8 +99,8 @@ export default {
       //const neighbours = [[0, 1],[1, 0],[0, -1],[-1, 0]];
       this.game.forEach((matrix, i) => {
         matrix.forEach((player, j) => {
-          this.checkneighbours(i, j, player,"payOff", ()=>{
-            // return a array 
+          this.checkneighbours(i, j, player, "payOff", () => {
+            // return a array
           });
         });
       });
@@ -104,104 +109,57 @@ export default {
       //const neighbours = [[0, 1],[1, 0],[0, -1],[-1, 0]];
       this.game.forEach((matrix, i) => {
         matrix.forEach((player, j) => {
-          this.checkneighbours(i, j, player,"strategy",this.playerStat);
+          this.checkneighbours(i, j, player, "strategy", this.playerStat);
         });
       });
     },
     checkneighbours(i, j, player, prop, callback) {
-      const westPlayerStat =  j > 0 ?  this.game[i][j - 1][prop] : "";
-      const eastPlayerStat =  j < this.game.length - 1 ? this.game[i][j + 1][prop]  : "";
-      const northPlayerStat = i > 0 ?  this.game[i - 1][j][prop] : "";
-      const southPlayerStat = i < this.game.length - 1  ? this.game[i + 1][j][prop] : "";
+      const westPlayerStat = j > 0 ? this.game[i][j - 1][prop] : "";
+      const eastPlayerStat =
+        j < this.game.length - 1 ? this.game[i][j + 1][prop] : "";
+      const northPlayerStat = i > 0 ? this.game[i - 1][j][prop] : "";
+      const southPlayerStat =
+        i < this.game.length - 1 ? this.game[i + 1][j][prop] : "";
 
-      console.log(eastPlayerStat);
-      callback(westPlayerStat,eastPlayerStat,northPlayerStat,southPlayerStat,player);
-      // right
-      // if (j < this.game.length - 1) {
-      //   if (game[i][j + 1].strategy == "C" && game[i][j].strategy == "C") {
-      //     game[i][j].payOff += 4;
-      //   }
-
-      //   if (game[i][j + 1].strategy == "D" && game[i][j].strategy == "C") {
-      //     game[i][j].payOff += 0;
-      //   }
-      //   if (game[i][j + 1].strategy == "C" && game[i][j].strategy == "D") {
-      //     game[i][j].payOff += 3;
-      //   }
-      //   if (game[i][j + 1].strategy == "D" && game[i][j].strategy == "D") {
-      //     game[i][j].payOff += 2;
-      //   }
-      // }
-      // left
-      // if (j > 0) {
-      //   if (game[i][j - 1].strategy == "C" && game[i][j].strategy == "C") {
-      //     game[i][j].payOff += 4;
-      //   }
-      //   if (game[i][j - 1].strategy == "D" && game[i][j].strategy == "C") {
-      //     game[i][j].payOff += 0;
-      //   }
-      //   if (game[i][j - 1].strategy == "C" && game[i][j].strategy == "D") {
-      //     game[i][j].payOff += 3;
-      //   }
-      //   if (game[i][j - 1].strategy == "D" && game[i][j].strategy == "D") {
-      //     game[i][j].payOff += 2;
-      //   }
-      // }
-
-      // down
-      // if (i < this.game.length - 1) {
-      //   if (game[i + 1][j].strategy == "C" && game[i][j].strategy == "C") {
-      //     game[i][j].payOff += 4;
-      //   }
-      //   if (game[i + 1][j].strategy == "D" && game[i][j].strategy == "C") {
-      //     game[i][j].payOff += 0;
-      //   }
-      //   if (game[i + 1][j].strategy == "C" && game[i][j].strategy == "D") {
-      //     game[i][j].payOff += 3;
-      //   }
-      //   if (game[i + 1][j].strategy == "D" && game[i][j].strategy == "D") {
-      //     game[i][j].payOff += 2;
-      //   }
-      // }
-      // up
-      // if (i > 0) {
-      //   if (game[i - 1][j].strategy == "C" && game[i][j].strategy == "C") {
-      //     game[i][j].payOff += 4;
-      //   }
-      //   if (game[i - 1][j].strategy == "D" && game[i][j].strategy == "C") {
-      //     game[i][j].payOff += 0;
-      //   }
-      //   if (game[i - 1][j].strategy == "C" && game[i][j].strategy == "D") {
-      //     game[i][j].payOff += 3;
-      //   }
-      //   if (game[i - 1][j].strategy == "D" && game[i][j].strategy == "D") {
-      //     game[i][j].payOff += 2;
-      //   }
+      callback(
+        westPlayerStat,
+        eastPlayerStat,
+        northPlayerStat,
+        southPlayerStat,
+        player
+      );
     },
     addStrat() {
       if (this.strategy != "") {
         this.strategies.push(this.strategy.toUpperCase());
       }
     },
-    playerStat(leftP,rightP,aboveP,belowP,middleP){
-          this.playOffValues.forEach((state) => {
-        if (middleP.strategy+leftP !== "") {
+    assignColours(colours) {
+      colours.forEach((current, index) => {
+        if (index < this.strategies.length) {
+          current.letter = this.strategies[index];
+        }
+      });
+    },
+    playerStat(leftP, rightP, aboveP, belowP, middleP) {
+      this.playOffValues.forEach((state) => {
+        if (middleP.strategy + leftP !== "") {
           if (state.outcome == middleP.strategy) {
             middleP.payOff += state.value;
           }
         }
-        if (middleP.strategy+rightP !== "") {
-          if (state.outcome == middleP.strategy+rightP) {
+        if (middleP.strategy + rightP !== "") {
+          if (state.outcome == middleP.strategy + rightP) {
             middleP.payOff += state.value;
           }
         }
-        if (middleP.strategy+aboveP !== "") {
-          if (state.outcome == middleP.strategy+aboveP) {
+        if (middleP.strategy + aboveP !== "") {
+          if (state.outcome == middleP.strategy + aboveP) {
             middleP.payOff += state.value;
           }
         }
-        if (middleP.strategy+belowP !== "") {
-          if (state.outcome == middleP.strategy+belowP) {
+        if (middleP.strategy + belowP !== "") {
+          if (state.outcome == middleP.strategy + belowP) {
             middleP.payOff += state.value;
           }
         }
