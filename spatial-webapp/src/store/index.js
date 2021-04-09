@@ -10,7 +10,8 @@ export default createStore({
       { colour: "bg-blue-700", letter: "" },
       { colour: "bg-purple-700", letter: "" },
       { colour: "bg-pink-700", letter: "" }
-    ]
+    ],
+    gameStates : []
   },
   mutations: {
   },

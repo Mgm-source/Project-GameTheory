@@ -26,10 +26,7 @@ export default {
   },
   methods: {
     selectPlayer(event, player) {
-      console.log(event, player);
-      if (this.interactive) {
-        this.$emit("select-pos", player);
-      }
+        this.$emit("select-pos", player, event);
     },
   },
   setup(props) {

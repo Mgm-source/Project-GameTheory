@@ -1,5 +1,5 @@
 <template>
-  <div :class="[active,'h-12 rounded-md flex items-center justify-center text-white text-2xl font-extrabold hover:bg-red-700']" @click="playerStatus">
+  <div :class="[active,'h-12 rounded-md flex items-center justify-center text-white text-2xl font-extrabold hover:bg-red-700 cursor-pointer']" @click="playerStatus">
     <i>{{player.strategy}} : {{player.payOff}}</i>
   </div>
 </template>
@@ -16,7 +16,7 @@ export default {
   },
   computed: {
     active() {
-      return this.interactive ? "bg-red-700" : this.stratColour.colour;
+      return  this.stratColour.colour;
     },
     // col() {return `board-cell-col-${this.player.id % this.size}`}
     // row() {return `board-cell-row-${Math.floor(this.player.id / this.size)}`},
@@ -24,7 +24,6 @@ export default {
       'colours'
     ]),
     stratColour() {
-      console.log(this.colours);
       return this.colours.find((element => element.letter == this.player.strategy))
     }
   },
