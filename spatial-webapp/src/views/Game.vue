@@ -9,16 +9,26 @@
           <div v-for="(strategy, index) in statPermutations" :key="index" class="p-4 mb-3 flex justify-between items-center bg-white shadow rounded-lg">
             {{ strategy.outcome }}
             <label for="dValue">value:</label>
-          <input type="number" name="value" id="dValue" v-model.number="statPermutations[index].value">
+          <input type="number" v-model.number="statPermutations[index].value">
           </div>
         </ul>
     </div>
-    <h1>This is where the spatial game information graph and stats goes</h1>
+      <div id="stats" class="m-1 relative rounded-md shadow-sm w-1/4">
+      <label for="strats" class="block text-sm font-medium text-gray-700">Number of players</label>
+      <div id="strats" name="stats" class="focus:ring-indigo-500 focus:border-indigo-500 block  pl-7 pr-1 sm:text-lg border-gray-300 rounded-md">
+        <i>{{numOfplayers}}  {{numOfstats}}</i>
+      </div>
+    </div>
+    <h1>This is where the spatial game information graph and stats goes <span>{{count}}</span></h1> 
     <button class="bg-yellow-500 py-2 px-4 bg-light-blue-500 text-white font-semibold rounded-lg" @click="initGame">
     Start
     </button>
-        <button class="bg-yellow-500 py-2 px-4 bg-light-blue-500 text-white font-semibold rounded-lg" @click="checkPlayOff">
-    play
+        <button class="bg-yellow-500 py-2 px-4 bg-light-blue-500 text-white font-semibold rounded-lg" @click="pause">
+    pause and play
+    </button>
+
+            <button class="bg-yellow-500 py-2 px-4 bg-light-blue-500 text-white font-semibold rounded-lg" @click="stop">
+    stop game
     </button>
     <spatial class="m-8" :players="players" @select-pos="currentPlayer" :game="game" v-if="gamestart">
     </spatial>
@@ -44,6 +54,10 @@ export default {
       strategies: ["C", "D"],
       strategy: "",
       playOffValues: [],
+      tick: 0,
+      count: 0,
+      loopID: null,
+      play : true
     };
   },
   computed: {
@@ -59,7 +73,17 @@ export default {
         })
         .flat();
     },
-    ...mapState(["colours","gameStates"]),
+    ...mapState(["colours", "gameStates"]
+    ),
+    numOfplayers(){ return this.players.length
+    },
+    numOfstats(){
+      let statslength = []
+      for( let i=0; i < this.strategies.length; i++){
+        statslength.push( { stat : this.strategies[i], size : this.players.filter( current => current.strategy == this.strategies[i]).length })
+      }
+      return statslength
+    }
   },
   methods: {
     createMatrix(size) {
@@ -82,26 +106,25 @@ export default {
       this.game.forEach((matrix) =>
         matrix.forEach((player) => {
           player.strategy = this.strategies[
-            Math.floor(Math.random() * this.strategies.length)
+            Math.round(Math.random() * (this.strategies.length - 1))
           ];
           this.players.push(player);
         })
       );
-
       this.assignColours(this.colours);
       console.log(this.playOffValues);
-      // make the function return true when all the players have been checked
-      // while loop to for the game function
-      this.checkStrategy();
-      console.log(this.game);
-      // let numOfPerm =;
-      // console.log(numOfPerm);
+      this.simulation();
     },
     checkPlayOff() {
       //const neighbours = [[0, 1],[1, 0],[0, -1],[-1, 0]];
       this.game.forEach((matrix, i) => {
         matrix.forEach((player, j) => {
-          this.checkneighbours(i, j, player, "payOff",(leftP, rightP, aboveP, belowP, middleP, prop) => {
+          this.checkneighbours(
+            i,
+            j,
+            player,
+            "payOff",
+            (leftP, rightP, aboveP, belowP, middleP, prop) => {
               if (leftP) {
                 if (leftP.strategy !== middleP.strategy) {
                   if (middleP[prop] < leftP[prop]) {
@@ -130,23 +153,44 @@ export default {
                   }
                 }
               }
-              // return a array
             }
           );
         });
       });
-      this.checkStrategy();
-      this.gameStates.push(this.game);
-    },currentPlayer(k){
-      let index = this.strategies.indexOf(k.strategy);
-      console.log(this.gameStates);
-      k.strategy = this.strategies[++index%this.strategies.length]
+    },
+    currentPlayer(p) {
+      let index = this.strategies.indexOf(p.strategy);
+      p.strategy = this.strategies[++index % this.strategies.length];
     },
     checkStrategy() {
-      //const neighbours = [[0, 1],[1, 0],[0, -1],[-1, 0]];
       this.game.forEach((matrix, i) => {
         matrix.forEach((player, j) => {
-          this.checkneighbours(i, j, player, "strategy", this.playerStat);
+          this.checkneighbours(i,j,player,"strategy",
+            (leftP, rightP, aboveP, belowP, middleP, prop) => {
+              this.playOffValues.forEach((state) => {
+                if (leftP) {
+                  if (state.outcome == middleP[prop] + leftP[prop]) {
+                    middleP.payOff += state.value;
+                  }
+                }
+                if (rightP) {
+                  if (state.outcome == middleP[prop] + rightP[prop]) {
+                    middleP.payOff += state.value;
+                  }
+                }
+                if (aboveP) {
+                  if (state.outcome == middleP[prop] + aboveP[prop]) {
+                    middleP.payOff += state.value;
+                  }
+                }
+                if (belowP) {
+                  if (state.outcome == middleP[prop] + belowP[prop]) {
+                    middleP.payOff += state.value;
+                  }
+                }
+              });
+            }
+          );
         });
       });
     },
@@ -170,30 +214,31 @@ export default {
         }
       });
     },
-    playerStat(leftP, rightP, aboveP, belowP, middleP, prop) {
-      //middleP.payOff = 0;
-      this.playOffValues.forEach((state) => {
-        if (leftP) {
-          if (state.outcome == middleP[prop] + leftP[prop]) {
-            middleP.payOff += state.value;
-          }
-        }
-        if (rightP) {
-          if (state.outcome == middleP[prop] + rightP[prop]) {
-            middleP.payOff += state.value;
-          }
-        }
-        if (aboveP) {
-          if (state.outcome == middleP[prop] + aboveP[prop]) {
-            middleP.payOff += state.value;
-          }
-        }
-        if (belowP) {
-          if (state.outcome == middleP[prop] + belowP[prop]) {
-            middleP.payOff += state.value;
-          }
-        }
-      });
+    loop() {
+      if(this.tick % 30 == 0)
+      {
+        this.checkStrategy()
+        this.checkPlayOff();
+        this.count++
+      }
+      
+    },
+    stop() {
+      cancelAnimationFrame(this.loopID);
+      console.log(this.gameStates)
+    },
+    pause() {
+     this.play = !this.play;
+    },
+    simulation() {
+
+      this.loopID = requestAnimationFrame(this.simulation);
+
+      if(this.play)
+      {
+        this.tick++
+        this.loop();
+      }
     },
   },
 };
