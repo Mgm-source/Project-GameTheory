@@ -25,8 +25,9 @@ export default {
     BoardCell,
   },
   methods: {
-    selectPlayer(event, player) {
-        this.$emit("select-pos", player, event);
+    selectPlayer(event, player, bool) {
+      // console.log(player);
+        this.$emit("select-pos", player, event, bool );
     },
   },
   setup(props) {
