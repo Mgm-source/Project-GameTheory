@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     selectPlayer(event, player, bool) {
-      // console.log(player);
+      //console.log(player);
         this.$emit("select-pos", player, event, bool );
     },
   },

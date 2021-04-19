@@ -15,10 +15,10 @@
               <input type="number" v-model.number="statPermutations[index].value">
             </div>
           </div>
-          <select class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" multiple @click="togStrat">
-            <optgroup label="Choose starting strategy">
+          <select class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" v-model="defS" @change="reload" v-if="game == false">
+            <option selected>Choose a strategy</option>
             <option v-for="(option, index) in strategies" :key="index" :value="option">{{option}}</option>
-            </optgroup>
+            
             </select>
         </div>
     </div>
@@ -27,7 +27,7 @@
       <chart :length="players.length"></chart>
     </div>
     </div>
-    <div class="m-1 rounded-md shadow-sm">
+    <div class="m-1 rounded-md shadow-sm" v-if="gamestart">
     <button class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" @click="simulation">Start</button>
     <button class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" @click="checkPlayOff">pause and play</button>
     <button class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" @click="stop">stop game</button>
@@ -49,9 +49,6 @@ export default {
   components: {
     Spatial,
     chart,
-  },created() {
-    this.initGame();
-    this.checkStrategy();
   },
   data() {
     return {
@@ -63,7 +60,8 @@ export default {
       tick: 0,
       count: 0,
       loopID: null,
-      play : true
+      play : true,
+      defS : "Choose a strategy"
     };
   },
   computed: {
@@ -83,10 +81,10 @@ export default {
               face.value = 3;
             }
             if(face.outcome == "DC"){
-              face.value = 5;
+              face.value = 1;
             }
             if(face.outcome == "DD"){
-              face.value = 1;
+              face.value = 5;
             }
           })
         }
@@ -95,9 +93,6 @@ export default {
     ...mapState(["colours", "gameStates","strategies","players"]
     ),
     ...mapGetters(['numOfstats']),
-    togStrat(){
-      return this.strategies.length-2
-    }
   },
   methods: {
     createMatrix(size) {
@@ -120,7 +115,7 @@ export default {
       this.game.forEach((matrix) =>
         matrix.forEach((player) => {
           // player.strategy = this.strategies[Math.round(Math.random() * (this.strategies.length - 1))];
-          player.strategy = this.strategies[this.togStrat];
+          player.strategy = this.strategies[this.strategies.indexOf(this.defS)];
 
           this.players.push(player);
         })
@@ -133,9 +128,9 @@ export default {
         matrix.forEach((player, j) => {
           this.checkneighbours(  i,  j, player,"payOff", ( neighbours , middleP, prop) => {
 
-              const highest = neighbours.reduce( (acc, curr) => acc[prop] < curr[prop] ? curr[prop] : acc[prop]);
+            const highest = Math.max(...neighbours.map( neighbour => neighbour.payOff));
 
-              console.log(highest);
+            //console.log(highest);
 
              const better = neighbours.filter( (neighbour)=> {
                
@@ -144,8 +139,38 @@ export default {
                 return true;
               }
             });
-              console.log(middleP,better);
+
+            let breaker = [];
+
+             for(let i=0; i< better.length; i++){
+
+               if(better[i][prop] == highest){
+                 breaker.push(better[i]);
+               }
+             }
+
+              if(breaker.length == 1){
+                if(middleP.strategy != breaker[0].strategy){
+                  middleP.strategy = breaker[0].strategy;
+                }
+                
+              }
+
+              if(breaker.length > 1){
+      
+                // if(breaker.every(curr=>curr.strategy == middleP.strategy)){
+                //   console.log( middleP,breaker, "Same");
+                // }
+
+                if(breaker.every(curr=>curr.strategy != middleP.strategy)){
+                  middleP.strategy = breaker[0].strategy;
+                  //console.log( middleP,breaker, "Different");
+                }
+              }
+            
+            //console.log(middleP,better,breaker);
             }
+            
           );
         });
       });
@@ -238,6 +263,13 @@ export default {
       });
     this.gameStates.push(array);
     },
+    reload(){
+      if(this.defS != "Choose a strategy"){
+        this.initGame();
+        this.checkStrategy();
+      }
+
+    }
   },
 };
 </script>
