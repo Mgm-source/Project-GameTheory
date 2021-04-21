@@ -21,12 +21,13 @@ export default createStore({
         statslength.push(state.players.filter(current => current.strategy == state.strategies[i]).length)
       }
       return statslength
-    }
-
+    },
   },
   mutations: {
+
   },
   actions: {
+    
   },
   modules: {
   }

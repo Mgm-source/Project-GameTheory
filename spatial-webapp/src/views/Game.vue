@@ -1,46 +1,50 @@
 <template>
   <div class="relative">
-    <div class="grid grid-cols-2 gap-4">
-    <div class="m-1 rounded-md shadow-sm">
-      <label for="inputStrategy" class="block text-sm font-medium text-gray-700">Add more strategies?
-      <input id="inputStrategy" type="text" name="stats" class="focus:ring-indigo-500 focus:border-indigo-500 block  pl-7 pr-1 sm:text-lg border-gray-300 rounded-md" maxlength="1" v-model="strategy" placeholder="Enter a letter"/>
-      </label>
-      <button class="items-center spx-4 font-bold text-white bg-indigo-600 rounded-r-lg hover:bg-indigo-500 focus:bg-indigo-700" @click="addStrat">Add</button>
-        <div id="strategies" class="focus:ring-indigo-500 focus:border-indigo-500 h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm rounded-md">
-          Strategies:
-          <div v-for="(strategy, index) in statPermutations" :key="index" class="p-4 mb-3 flex justify-between items-center bg-white shadow rounded-lg">
-            {{ strategy.outcome }}
-            <div>
-              value:
-              <input type="number" v-model.number="statPermutations[index].value">
+    <div class="grid grid-cols-4 gap-4">
+      <div class="m-1 rounded-md shadow-sm text-2xl">
+        <label for="inputStrategy" class="block font-medium text-gray-700">Add more strategies?</label>
+        <input id="inputStrategy" type="text" name="stats" class="focus:ring-indigo-500 focus:border-indigo-500 block  pl-7 pr-1 border-gray-300 rounded-md" maxlength="1" v-model="strategy" placeholder="Enter a letter"/>
+        <button class="items-center spx-4 font-bold text-white bg-indigo-600 rounded-r-lg hover:bg-indigo-500 focus:bg-indigo-700" @click="addStrat">Add</button>
+          <div id="strategies" class="focus:ring-indigo-500 focus:border-indigo-500 h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 rounded-md">Strategies:
+            <div v-for="(strategy, index) in statPermutations" :key="index" class="p-4 mb-3 flex justify-between items-center bg-white shadow rounded-lg text-3xl">{{ strategy.outcome }}
+              <label :for="'strategy'+index" class="relative">value:
+                <input :id="'strategy'+index" type="number" v-model.number="statPermutations[index].value">
+              </label>
             </div>
-          </div>
-          <select class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" v-model="defS" @change="reload" v-if="game == false">
-            <option selected>Choose a strategy</option>
-            <option v-for="(option, index) in strategies" :key="index" :value="option">{{option}}</option>
-            
+            <select class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" v-model="defS" @change="reload" v-if="game == false">
+              <option selected>Choose a strategy</option>
+              <option v-for="(option, index) in strategies" :key="index" :value="option">{{option}}</option>
             </select>
-        </div>
+          </div>
     </div>
-        <div class="m-1 rounded-md shadow-sm">
-      
+
+    <div class="m-1 rounded-md shadow-sm">
       <chart :length="players.length"></chart>
     </div>
+      
+    <div class="m-1 rounded-md shadow-sm">
+      <chart :length="players.length"></chart>
+    </div>
+
+    <div class="m-1 rounded-md shadow-sm">
+      <chart :length="players.length"></chart>
+    </div>
+
     </div>
     <div class="m-1 rounded-md shadow-sm" v-if="gamestart">
-    <button class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" @click="simulation">Start</button>
-    <button class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" @click="checkPlayOff">pause and play</button>
-    <button class="bg-yellow-500 py-2 px-4 text-white font-semibold rounded-lg" @click="stop">stop game</button>
+      <button class="bg-green-500 py-2 px-4 text-white font-semibold block-lg" v-if="!count" @click="simulation">Start</button>
+      <button class="bg-blue-500 py-2 px-4 text-white font-semibold block-lg" @click="pause">pause</button>
+      <button class="bg-red-500 py-2 px-4 text-white font-semibold block-lg" @click="stop">stop game</button>
+      <button class="bg-red-700 py-2 px-4 text-white font-semibold block-lg" @click="restart">restart game</button>
+      <button class="bg-yellow-500 py-2 px-4 text-white font-semibold block-lg" >Step : {{count}}</button>
     </div> 
-
-    <spatial :players="players" @select-pos="currentPlayer" :game="game" v-if="gamestart">
-    </spatial>
+    <spatial :players="players" @select-pos="currentPlayer" :game="game" v-if="gamestart"></spatial>
   </div>
 </template>
 
 <script>
 import Spatial from "@/components/spatial";
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 import chart from '../components/chart.vue';
 // @ is an alias to /src
 
@@ -53,7 +57,7 @@ export default {
   data() {
     return {
       game: [],
-      size: 50,
+      size: 10,
       gamestart: false,
       strategy: "",
       playOffValues: [],
@@ -78,13 +82,16 @@ export default {
         if(outcomes.length == 4){
           outcomes.forEach( face => {
             if(face.outcome == "CC"){
-              face.value = 3;
+              face.value = 4;
             }
             if(face.outcome == "DC"){
-              face.value = 1;
+              face.value = 5;
             }
             if(face.outcome == "DD"){
-              face.value = 5;
+              face.value = 1;
+            }
+            if(face.outcome == "CD"){
+              face.value = 0;
             }
           })
         }
@@ -92,7 +99,6 @@ export default {
     },
     ...mapState(["colours", "gameStates","strategies","players"]
     ),
-    ...mapGetters(['numOfstats']),
   },
   methods: {
     createMatrix(size) {
@@ -128,32 +134,33 @@ export default {
         matrix.forEach((player, j) => {
           this.checkneighbours(  i,  j, player,"payOff", ( neighbours , middleP, prop) => {
 
+            let breaker = [];
+            let diffStrategies = {};
+            const rand = Math.random();
+
             const highest = Math.max(...neighbours.map( neighbour => neighbour.payOff));
 
             //console.log(highest);
 
-             const better = neighbours.filter( (neighbour)=> {
-               
-               if(neighbour[prop] > middleP[prop]){
-                
-                return true;
+            neighbours.filter( neighbour => neighbour[prop] > middleP[prop]).forEach( neighbour => {
+
+              if(neighbour[prop] == highest){
+                breaker.push(neighbour);
+                diffStrategies[neighbour.strategy] = (diffStrategies[neighbour.strategy] || 0) + 1; 
               }
             });
-
-            let breaker = [];
-
-             for(let i=0; i< better.length; i++){
-
-               if(better[i][prop] == highest){
-                 breaker.push(better[i]);
-               }
-             }
-
+             const strategies = breaker.map( neighbour => neighbour.strategy);
+             const cantChoose = new Set(strategies).size !== 1;
+             
               if(breaker.length == 1){
                 if(middleP.strategy != breaker[0].strategy){
                   middleP.strategy = breaker[0].strategy;
                 }
-                
+              }
+
+              let prob = []
+              for (const [key, value] of Object.entries(diffStrategies)){
+                prob.push( { strategy :  key , probability : value/strategies.length });
               }
 
               if(breaker.length > 1){
@@ -162,13 +169,16 @@ export default {
                 //   console.log( middleP,breaker, "Same");
                 // }
 
+                if(cantChoose){
+                  middleP.strategy = breaker[Math.floor(rand * breaker.length)].strategy;
+                 // middleP.strategy = prob.reduce( (prev,curr) => prev.probability < curr.probability ? curr : prev).strategy;
+                }
+
                 if(breaker.every(curr=>curr.strategy != middleP.strategy)){
                   middleP.strategy = breaker[0].strategy;
-                  //console.log( middleP,breaker, "Different");
+                  //console.log( middleP,breaker, "Opposite");
                 }
               }
-            
-            //console.log(middleP,better,breaker);
             }
             
           );
@@ -183,17 +193,17 @@ export default {
     checkStrategy() {
       this.game.forEach((matrix, i) => {
         matrix.forEach((player, j) => {
-          this.checkneighbours(i,j,player,"strategy",
-            (neighbours, middleP, prop) => {
+
+          this.checkneighbours(i,j,player,"strategy", (neighbours, middleP, prop) => {
               middleP.payOff = 0;
 
               this.playOffValues.forEach( (state) => {
 
-                  neighbours.forEach((neighbour) => {
+                neighbours.forEach((neighbour) => {
 
-                      if(state.outcome == middleP[prop] + neighbour[prop]) {
-                        middleP.payOff += state.value;
-                    }
+                  if(state.outcome == middleP[prop] + neighbour[prop]) {
+                    middleP.payOff += state.value;
+                  }
                   });
                 });
             });
@@ -243,18 +253,20 @@ export default {
       cancelAnimationFrame(this.loopID);
       console.log(this.gameStates)
     },
-    pause() {
+    pause(event) {
      this.play = !this.play;
+     event.target.innerText = this.play ? "pause":"play";
     },
     simulation() {
-
-      this.loopID = requestAnimationFrame(this.simulation);
 
       if(this.play)
       {
         this.tick++
         this.loop();
       }
+      
+     this.loopID = requestAnimationFrame(this.simulation);
+
     },
     copyGameState(){
       let array = [];
@@ -268,6 +280,29 @@ export default {
         this.initGame();
         this.checkStrategy();
       }
+
+    },
+    restart(){
+      cancelAnimationFrame(this.loopID);
+      this.defS = "Choose a strategy";
+      this.gamestart = false;
+      this.game = [];
+
+      function deleteArray(array) {
+        
+        for(let i =0 ; i < array.length; i++){
+          array.pop();
+        }
+        
+        if(array.length !== 0){
+
+          deleteArray(array);
+
+        }
+      }
+      
+      deleteArray(this.gameStates);
+      deleteArray(this.players);
 
     }
   },

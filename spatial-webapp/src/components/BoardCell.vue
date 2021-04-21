@@ -1,7 +1,7 @@
 <template>
-  <div :class="[active,'h-12 rounded-md flex items-center justify-center text-white text-2xl font-extrabold hover:bg-red-700 cursor-pointer']" @click="playerStatus">
-    <i> {{player.strategy}}: {{player.payOff}}</i>
-  </div>
+  <button :class="[active,'h-12 rounded-md flex items-center justify-center text-white text-2xl font-extrabold hover:bg-red-700 cursor-pointer']" @click="playerStatus">
+ {{player.strategy}}: {{player.payOff}}
+  </button>
 </template>
 
 <script>
