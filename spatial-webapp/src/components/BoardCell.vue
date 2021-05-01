@@ -1,6 +1,6 @@
 <template>
   <button :class="[active,'h-12 rounded-md flex items-center justify-center text-white text-2xl font-extrabold hover:bg-red-700 cursor-pointer']" @click="playerStatus">
- {{player.strategy}}: {{player.payOff}}
+ {{player.payOff.toFixed(2)}}
   </button>
 </template>
 
@@ -16,7 +16,7 @@ export default {
   },
   computed: {
     active() {
-      return  this.stratColour.colour;
+      return  this.stratColour.colour[this.player.state];
     },
     // col() {return `board-cell-col-${this.player.id % this.size}`}
     // row() {return `board-cell-row-${Math.floor(this.player.id / this.size)}`},

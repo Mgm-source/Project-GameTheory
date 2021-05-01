@@ -1,11 +1,9 @@
 <template>
-  <div class="spatial-board gap-2" :style="dynamicGrid">
-    <template v-for="p in players" :key="p.id">
-      <board-cell
+  <div class="grid gap-2 w-auto h-auto select-none" :style="dynamicGrid">
+      <board-cell v-for="p in players" :key="p.id"
         :player="p"
         @select-cell="selectPlayer"
-      ></board-cell>
-    </template>
+      >a</board-cell>
   </div>
 </template>
 
@@ -17,17 +15,13 @@ export default {
     players: { type: Array, required: true },
     game: { type: Array, required: true },
   },
-  computed: { },
-  data() {
-    return {};
-  },
+  emits : ["select-pos"],
   components: {
     BoardCell,
   },
   methods: {
     selectPlayer(event, player, bool) {
-      //console.log(player);
-        this.$emit("select-pos", player, event, bool );
+      this.$emit("select-pos", player, event, bool );
     },
   },
   setup(props) {
@@ -39,8 +33,3 @@ export default {
   },
 };
 </script>
-<style>
-.spatial-board {
-  display: grid;
-}
-</style>
