@@ -35,8 +35,8 @@
               <option v-for="(option, index) in strategies" :key="index" :value="option">{{option}}</option>
             </select>
             <div class="mb-4" v-if="gamestart == false" ><span class="text-black">Matrix (n*n)</span>
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="size.x" max="100" min="0">
-              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model="size.y" max="100" min='0'>
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model.number="size.x" max="100" min="0" type="number" @change="vaildate">
+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" v-model.number="size.y" max="100" min='0' type="number" @change="vaildate">
           </div>
           </div>
           </div>
@@ -271,6 +271,15 @@ export default {
           player.state = 1;
         }
       })
+      }
+    },
+    vaildate(e){
+      const num = Number.parseInt(e.target.value)
+      if( num > 100 || num < 0){
+        e.target.value = 20;
+      }
+      if(e.target.value == ""){
+        e.target.value = 20;
       }
     },
     titfortat(){
