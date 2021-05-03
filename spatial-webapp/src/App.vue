@@ -1,16 +1,14 @@
 <template>
 <div id="app">
-  <nav class="bg-gray-800">
+  <header class="bg-gray-800">
     <div class="px-2">
       <div class="relative flex items-center justify-between h-16">
             <div class="flex space-x-4">
-              <router-link class="bg-gray-500 text-white px-3 py-2 rounded-md text-sm font-medium" :to="{name : 'Home' }">Home</router-link>
-              <router-link class="bg-blue-500 text-white px-3 py-2 rounded-md text-sm font-medium" :to="{name : 'About' }">About</router-link>
-              <router-link class="bg-yellow-500 text-white px-3 py-2 rounded-md text-sm font-medium" :to="{name : 'Game' }">Game</router-link>
+              <span class="bg-gray-500 text-white px-3 py-2 rounded-md text-sm font-medium">Spatial Game simulator</span>
             </div>
       </div>
     </div>
-  </nav>
+  </header>
   <router-view>
   </router-view>
 </div>
