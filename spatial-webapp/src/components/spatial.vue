@@ -1,9 +1,9 @@
 <template>
-  <div class="grid gap-2 w-auto h-auto select-none" :style="dynamicGrid">
+  <div class="grid gap-1 select-none h-full" :style="dynamicGrid">
       <board-cell v-for="p in players" :key="p.id"
         :player="p"
         @select-cell="selectPlayer"
-      >a</board-cell>
+      ></board-cell>
   </div>
 </template>
 

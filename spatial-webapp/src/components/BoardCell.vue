@@ -1,6 +1,6 @@
 <template>
-  <button :class="[active,'h-12 rounded-md flex items-center justify-center text-white text-2xl font-extrabold hover:bg-red-700 cursor-pointer']" @click="playerStatus">
- {{player.payOff.toFixed(2)}}
+  <button :class="[active,'rounded-md text-white text-2xl font-extrabold hover:bg-red-700 cursor-pointer h-auto']" @click="playerStatus">
+    {{player.strategy}}
   </button>
 </template>
 

@@ -7,12 +7,23 @@
         <input id="inputStrategy" type="text" name="stats" class="focus:ring-indigo-500 focus:border-indigo-500 block  pl-7 pr-1 border-gray-300 rounded-md" maxlength="1" v-model="strategy" placeholder="Enter a letter"/>
         <button class="font-bold text-white bg-indigo-600 hover:bg-indigo-500 focus:bg-indigo-700" @click="addStrat">Add</button>
         </div>
-          <div id="strategies" class="focus:ring-indigo-500 focus:border-indigo-500 h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 rounded-md"><span class="text-gray-700">Strategies:</span>
+          <div class="focus:ring-indigo-500 focus:border-indigo-500 h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 rounded-md">
+          <div class="">
+            <span class="text-gray-700">Strategies:</span>
             <div v-for="(strategy, index) in statPermutations" :key="index" class="p-4 mb-3 flex justify-between items-center bg-white shadow rounded-lg text-3xl">{{ strategy.outcome }}
               <label :for="'strategy'+index" class="relative">value:
-                <input :id="'strategy'+index" type="number" v-model.number="statPermutations[index].value">
+                <input :id="'strategy'+index" type="number" v-model.number="strategy.value">
               </label>
             </div>
+          </div>
+          <!-- <div class="">
+            <span class="text-gray-700">Probabilities:</span>
+          <div v-for="(prob, index) in reactiveStrat" :key="index" class="p-4 mb-3 flex justify-between items-center bg-white shadow rounded-lg text-3xl">{{ prob.strategy }}
+              <label :for="'proba'+index" class="relative">value:
+                <input :id="'proba'+index" type="number" max="1" min="0" step="0.1" v-model.number="prob.probability">
+              </label>
+            </div>
+          </div> -->
           <div v-if="game == false" class="flex text-white font-semibold">
             <div class="bg-yellow-500 py-2 px-4 rounded-lg">
               <span>Neighborhood type</span>
@@ -47,12 +58,15 @@
       <button class="bg-red-500 py-2 px-4 text-white font-semibold block-lg" @click="stop">stop game</button>
       <button class="bg-red-700 py-2 px-4 text-white font-semibold block-lg" @click="restart">restart game</button>
       <button class="bg-yellow-500 py-2 px-4 text-white font-semibold block-lg" >Step : {{count}}</button>
+      <button class="bg-pink-500 py-2 px-4 text-white font-semibold block-lg" v-if="this.strategies.length == 2 && !count" @click="toggleTat">Tit for tat : {{titgame}}</button>
+
     </div> 
     <spatial :players="players" @select-pos="currentPlayer" :game="game" v-if="gamestart"></spatial>
   </div>
 </template>
 
 <script>
+const chance = require('chance').Chance();
 import Spatial from "@/components/spatial";
 import { mapState } from "vuex";
 import piechart from '../components/piechart.vue';
@@ -69,16 +83,18 @@ export default {
   data() {
     return {
       game: [],
-      size: { y : 100 , x : 100},
+      size: { y : 20 , x : 20},
       gamestart: false,
       strategy: "",
-      playOffValues: [],
       tick: 0,
       count: 0,
       loopID: null,
       play : false,
       defS : "Choose a strategy",
-      moore : 1
+      moore : 1,
+      reactiveValues : [],
+      oldStrat : [],
+      titgame: false
     };
   },
   computed: {
@@ -98,7 +114,7 @@ export default {
               face.value = 1;
             }
             if(face.outcome == "DC"){
-              face.value = 1.7;
+              face.value = 1.65;
             }
             if(face.outcome == "DD"){
               face.value = 0;
@@ -110,8 +126,20 @@ export default {
         }
       return outcomes;
     },
-    ...mapState(["colours", "gameStates","strategies","players"]
-    ),
+    reactiveStrat(){
+      const stochastic = this.strategies.map( (current) => { return { strategy : current , probability : 0 }})
+      stochastic[0].probability = 1;
+      return stochastic;
+    },
+    splitArray(){ 
+      let object = { items : [], chance : []};
+      this.reactiveValues.forEach( value => {
+        object.items.push( value.strategy)
+        object.chance.push(value.probability)
+      })
+      return object;
+    },
+    ...mapState(["colours", "gameStates","strategies","players"]),
   },
   methods: {
     createMatrix(size) {
@@ -129,7 +157,7 @@ export default {
     initGame() {
       this.gamestart = true;
       this.game = this.createMatrix(this.size);
-      this.playOffValues = this.statPermutations;
+      this.reactiveValues = this.reactiveStrat;
 
       this.game.forEach((matrix) =>
         matrix.forEach((player) => {
@@ -144,12 +172,13 @@ export default {
       this.assignColours(this.colours);
     },
     checkPlayOff() {
+      let prev = [];
       this.players.forEach((player, i , array) => {
 
-          this.checkneighbours(i, array, "payOff", ( neighbours,prop) => {
+          this.checkneighbours(i, array, "payOff", (neighbours,prop) => {
 
             let breaker = [];
-            let diffStrategies = {};
+            // let diffStrategies = {};
             //const rand = Math.random();
 
             const highest = Math.max(...neighbours.map( neighbour => neighbour.payOff));
@@ -158,12 +187,12 @@ export default {
 
               if(neighbour[prop] == highest){
                 breaker.push(neighbour);
-                diffStrategies[neighbour.strategy] = (diffStrategies[neighbour.strategy] || 0) + 1; 
+                // diffStrategies[neighbour.strategy] = (diffStrategies[neighbour.strategy] || 0) + 1; 
               }
             });
 
-             const strategies = breaker.map( neighbour => neighbour.strategy);
-             const cantChoose = new Set(strategies).size !== 1;
+              const strategies = breaker.map( neighbour => neighbour.strategy);
+              const cantChoose = new Set(strategies).size !== 1;
 
              
               if(breaker.length == 1){
@@ -172,12 +201,10 @@ export default {
                   player.strategy = breaker[0].strategy;
                 }
               }
-        
-
-              let prob = [];
-              for (const [key, value] of Object.entries(diffStrategies)){
-                prob.push( { strategy :  key , probability : value/strategies.length });
-              }
+              // let prob = [];
+              // for (const [key, value] of Object.entries(diffStrategies)){
+              //   prob.push( { strategy :  key , probability : value/strategies.length });
+              // }
 
               if(breaker.length > 1){
       
@@ -191,19 +218,21 @@ export default {
 
                 if(cantChoose){
 
-                 // player.strategy = breaker[Math.floor(rand * breaker.length)].strategy;
-                  //player.state = 1;
+                  player.strategy = breaker[chance.integer({ min : 0, max : breaker.length-1})];
                 
                 }
 
                 if(breaker.every(curr=>curr.strategy != player.strategy)){
                   player.strategy = breaker[0].strategy;
                 }
+
               }
+              prev.push(player.strategy);
             }
             
           );
         });
+        this.oldStrat.push(prev);
     },
     currentPlayer(p) {
       if(!this.play){
@@ -211,12 +240,15 @@ export default {
       p.strategy = this.strategies[++index % this.strategies.length];
       }
     },
+    toggleTat(){
+      this.titgame = !this.titgame;  
+    },
     checkStrategy() {
       
       this.players.forEach( (player, i , array) => {
         player.payOff = 0;
           this.checkneighbours(i, array,"strategy", (neighbours,prop) => {
-              this.playOffValues.forEach( state =>{
+              this.statPermutations.forEach( state =>{
                 neighbours.forEach((neighbour) => {
                   if( state.outcome === player[prop].concat(neighbour[prop]) ) {
                     player.payOff += state.value;
@@ -250,6 +282,27 @@ export default {
       callback(neighbours.filter( neighbour => neighbour != null), prop);
 
     },
+    compareState(){
+      if(this.count > 0){
+      this.players.forEach( (player, i) => {
+        player.state = 0;
+        if(player.strategy !== this.gameStates[this.gameStates.length-2][i].strategy){
+          player.state = 1;
+        }
+      })
+      }
+    },
+    titfortat(){
+      if(this.count > 0){
+        this.players.forEach( (player, i) => {
+        if(this.oldStrat[this.oldStrat.length-2][i] === "D"){
+          player.strategy = "D"
+        }else{
+          player.strategy = "C";
+        }
+      })
+      }
+    },
     addStrat() {
       if (this.strategy != "") {
         this.strategies.push(this.strategy.toUpperCase());
@@ -263,14 +316,17 @@ export default {
       });
     },
     loop() {
-      if(this.tick % 10 == 0)
-      {
+      if(this.tick % 35 == 0){
         this.pushState();
+        this.compareState();
         this.checkPlayOff();
+        if(this.titgame){
+          console.log(1);
+          this.titfortat();
+        }
         this.checkStrategy();
-        this.count++
-      }
-      
+        this.count++;
+      } 
     },
     stop() {
       cancelAnimationFrame(this.loopID);
@@ -285,7 +341,6 @@ export default {
       if(this.tick == 0){
         this.play = true;
         this.checkStrategy();
-        console.log("start");
       }
 
       if(this.play)
@@ -327,11 +382,9 @@ export default {
 
         }
       }
-      
       deleteArray(this.gameStates);
       deleteArray(this.players);
-
-    }
+    },
   },
 };
 </script>

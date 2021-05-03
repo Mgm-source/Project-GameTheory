@@ -31,7 +31,7 @@ export default {
         dataLabels: { enabled: true },
         xaxis: {
           labels: {
-            show: true,
+            show: false,
           },
           categories: generation,
           title: {
@@ -39,10 +39,9 @@ export default {
           },
         },
         yaxis: {
-          min  : 0,
           labels: {
             formatter: function (val) {
-              return val + "%";
+              return val.toFixed(2) + "%";
             },
           },
         },
