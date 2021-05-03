@@ -294,7 +294,7 @@ export default {
       }
     },
     addStrat() {
-      if (this.strategy != "") {
+      if (this.strategy != "" && this.strategy !='C' && this.strategy != "D" && this.strategy != this.strategies[this.strategies.length-1]) {
         this.strategies.push(this.strategy.toUpperCase());
       }
     },
